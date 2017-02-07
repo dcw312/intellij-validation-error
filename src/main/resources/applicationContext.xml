@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-4.2.xsd">
+
+    <bean id="allHeadersMapper" class="org.springframework.integration.amqp.support.DefaultAmqpHeaderMapper">
+        <property name="requestHeaderNames" value="*"/>
+        <property name="replyHeaderNames" value="*"/>
+    </bean>
+
+    <bean abstract="true" id="amqpConnectionFactory"
+          class="org.springframework.amqp.rabbit.connection.ConnectionFactory"/>
+
+    <rabbit:queue name="queue"/>
+
+    <int-amqp:inbound-channel-adapter
+            channel="RequestInboundChannel" queue-names="queue"
+            connection-factory="amqpConnectionFactory" error-channel="ErrorMessageChannel"
+            header-mapper="allHeadersMapper" concurrent-consumers="1"/>
+
+    <int-amqp:channel id="RequestInboundChannel" connection-factory="amqpConnectionFactory"/>
+    <int-amqp:channel id="ErrorMessageChannel" connection-factory="amqpConnectionFactory"/>
+</beans>
